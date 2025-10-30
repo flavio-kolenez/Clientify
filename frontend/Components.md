@@ -1,0 +1,1 @@
+[Options para ativo / desativo](https://ui.shadcn.com/docs/components/select)
