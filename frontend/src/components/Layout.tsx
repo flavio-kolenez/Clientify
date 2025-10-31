@@ -1,34 +1,99 @@
-// src/components/layout.tsx
-import { SidebarProvider, Sidebar, SidebarTrigger, SidebarContent, SidebarHeader, SidebarFooter } from "@/components/ui/sidebar"
-import { Home, Settings } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import {
+    SidebarProvider,
+    Sidebar,
+    SidebarContent,
+    SidebarHeader,
+    SidebarFooter,
+    SidebarMenu,
+    SidebarMenuItem,
+    SidebarMenuButton,
+} from "@/components/ui/sidebar";
 
+import {
+    DropdownMenu,
+    DropdownMenuTrigger,
+    DropdownMenuContent,
+    DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+
+import { Settings, UserPlus, Users, UsersRound } from "lucide-react";
 
 type LayoutProps = {
-  children: React.ReactNode
-}
+    children: React.ReactNode;
+};
 
 export function Layout({ children }: LayoutProps) {
     return (
-        <SidebarProvider>
-            <div className="flex min-h-screen bg-gray-50">
-                {/* Sidebar */}
-                <Sidebar side="left">
-                    <SidebarHeader className="px-4 py-2 border-b">
-                        <h2 className="text-lg font-semibold">Menu</h2>
+        <div className="flex min-h-screen bg-gray-50">
+            <SidebarProvider>
+                <Sidebar side="left" collapsible="icon" className="border-r group transition-all">
+                    <SidebarHeader
+                        className="
+                            px-4 py-2 border-b
+                            flex flex-row items-center justify-start
+                            transition-all
+                            group-data-[collapsible=icon]:justify-center
+                            group-data-[collapsible=icon]:px-0
+                            gap-2
+                            group-data-[collapsible=icon]:gap-0
+                            "
+                    >
+                        <UsersRound className="h-5 w-5 shrink-0" />
+                        <h2 className="
+                                text-sm font-semibold transition-all
+                                group-data-[collapsible=icon]:opacity-0
+                                group-data-[collapsible=icon]:w-0
+                                group-data-[collapsible=icon]:overflow-hidden
+                            "
+                        >
+                            Clientify
+                        </h2>
                     </SidebarHeader>
-                    <SidebarContent className="p-4 space-y-2">
-                        <Button variant="ghost" className="w-full justify-start"><Home className="h-1 w-1" /> Home</Button>
+
+                    {/* MENU */}
+                    <SidebarContent className="p-2 space-y-1">
+                        <SidebarMenu>
+                            <SidebarMenuItem>
+                                <SidebarMenuButton>
+                                    <Users className="h-5 w-5" />
+                                    <span>Listar Clientes</span>
+                                </SidebarMenuButton>
+
+                                <SidebarMenuButton>
+                                    <UserPlus className="h-5 w-5" />
+                                    <span>Cadastrar Cliente</span>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
+                        </SidebarMenu>
                     </SidebarContent>
-                    <SidebarFooter className="p-4 border-t">
-                        <Button variant="outline" className="w-full">Sair</Button>
+
+                    {/* FOOTER */}
+                    <SidebarFooter className="border-t">
+                        <SidebarMenu>
+                            <SidebarMenuItem>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <SidebarMenuButton>
+                                            <Settings className="h-5 w-5" />
+                                            <span>Configurações</span>
+                                        </SidebarMenuButton>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent
+                                        side="top"
+                                        className="w-[--radix-popper-anchor-width]"
+                                    >
+                                        <DropdownMenuItem>
+                                            <span>Account</span>
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </SidebarMenuItem>
+                        </SidebarMenu>
                     </SidebarFooter>
                 </Sidebar>
 
-                <main className="flex-1 p-6">
-                    {children} {/* 👈 Isso aqui é o que faz o conteúdo aparecer */}
-                </main>
-            </div>
-        </SidebarProvider>
-    )
+                <main className="flex-1 p-4">{children}</main>
+            </SidebarProvider>
+        </div >
+    );
 }

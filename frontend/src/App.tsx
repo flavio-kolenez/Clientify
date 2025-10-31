@@ -1,19 +1,23 @@
 import { Layout } from "@/components/Layout";
 
 import { SidebarTrigger } from "@/components/ui/sidebar"
+import { ClientForm } from "@/components/ClientForm"
 
 function App() {
   return (
     <Layout>
-      <main className="flex-1 p-6">
-        <div className="flex items-center justify-between mb-4">
-          <SidebarTrigger />
-          <h1 className="text-3xl font-bold">Dashbard</h1>
-        </div>
-        <p className="text-gray-700">Aqui vai o conteúdo principal da página ✨</p>
-      </main>
+      <div className="relative mb-4">
+        <SidebarTrigger className="absolute mt-0 left-0 top-1/2 -translate-y-1/2" />
+        <h1 className="text-center text-2xl text-bold">Clientes</h1>
+      </div>
+
+      <hr />
+
+      <div className="flex justify-center mt-5">
+       <ClientForm />
+      </div>
     </Layout>
   );
-}
+};
 
-export default App
+export default App;
