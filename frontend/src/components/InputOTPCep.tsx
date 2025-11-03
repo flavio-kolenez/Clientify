@@ -5,13 +5,17 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp"
 
-export function InputOTPCep({ onComplete }) {
+type InputOTPCepProps = {
+  onComplete?: (formatted: string, value: string) => void;
+};
+
+export function InputOTPCep({ onComplete }: InputOTPCepProps) {
   return (
     <InputOTP
       maxLength={8}
       pattern="[0-9]*"
       inputMode="numeric"
-      onComplete={(value) => {
+      onComplete={(value: string) => {
         const formatted = `${value.slice(0, 5)}-${value.slice(5)}`
         onComplete?.(formatted, value)
       }}
@@ -24,8 +28,7 @@ export function InputOTPCep({ onComplete }) {
         <InputOTPSlot index={4} />
       </InputOTPGroup>
 
-      <InputOTPSeparator />
-
+ - 
       <InputOTPGroup>
         <InputOTPSlot index={5} />
         <InputOTPSlot index={6} />
