@@ -1,19 +1,26 @@
-import express from "express";
-import { connectDB } from "./src/config/database.js";
-import routes from "./src/routes/index.js";
-import { errorHandler } from "./src/middlewares/errorHandler.js";
+import express from "express"
+import { connectDB } from "./src/config/database.js"
+import routes from "./src/routes/index.js"
+import { errorHandler } from "./src/middlewares/errorHandler.js"
+import cors from "cors"
 
-const app = express();
+const app = express()
 
-app.use(express.json());
+app.use(cors({
+  origin: "http://localhost:5173", // endereço do frontend (Vite)
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+}))
 
-// Conectar ao MongoDB
-connectDB();
+app.use(express.json())
 
-// // Rotas
-app.use("/", routes);
+// 🧩 Conectar ao MongoDB
+connectDB()
 
-// // Middleware global de erro
-app.use(errorHandler);
+// 🛣️ Rotas
+app.use("/", routes)
 
-export default app;
+// 🚨 Middleware global de erro
+app.use(errorHandler)
+
+export default app

@@ -1,3 +1,4 @@
+import { useState } from "react"
 import {
   Card,
   CardContent,
@@ -12,8 +13,64 @@ import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@radix-ui/react-tooltip"
 import { SearchCheck } from "lucide-react"
 import { InputOTPCep } from "./InputOTPCep"
+import { api } from "../../services/api"
+
+type FormFields = "name" | "email" | "phone" | "document" | "cep" | "clientType"
 
 export function ClientForm() {
+  const fieldLabels: Record<string, string> = {
+    name: "Nome",
+    email: "Email",
+    phone: "Telefone",
+    document: "CPF / CNPJ",
+    postalCode: "CEP",
+  }
+
+  const fields: FormFields[] = ["name", "email", "phone", "document"];
+
+  const [formData, setFormData] = useState<Record<FormFields, string>>({
+    name: "",
+    email: "",
+    phone: "",
+    document: "",
+    cep: "",
+    clientType: "CPF"
+  })
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target
+    setFormData({ ...formData, [id]: value })
+  }
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const payload = {
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+      document: formData.document,
+      clientType: formData.clientType,
+      address: {
+        postalCode: formData.cep
+      }
+    };
+
+    try {
+      const res = await api.post("/client", payload);
+
+      console.log("✅ Cliente cadastrado:", res.data);
+      alert("Cliente cadastrado com sucesso!");
+      setFormData({ name: "", email: "", phone: "", document: "", cep: "", clientType: "CPF" });
+    } catch (err) {
+
+      console.error(err);
+      alert("Erro ao cadastrar cliente.");
+    }
+  };
+
+
+
   return (
     <Card className="w-full max-w-md shadow-lg">
       <CardHeader>
@@ -24,51 +81,31 @@ export function ClientForm() {
       </CardHeader>
 
       <CardContent>
-        <form className="flex flex-col space-y-6">
-          <div className="grid gap-2">
-            <Label htmlFor="name">Nome</Label>
-            <Input
-              id="name"
-              type="text"
-              placeholder="Digite o nome do cliente"
-              required
-            />
-          </div>
-
-          <div className="grid gap-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="email@exemplo.com"
-              required
-            />
-          </div>
-
-          <div className="grid gap-2">
-            <Label htmlFor="phone">Telefone</Label>
-            <Input
-              id="phone"
-              type="number"
-              placeholder="Digite o telefone do cliente"
-              required
-            />
-          </div>
-
-          <div className="grid gap-2">
-            <Label htmlFor="document">CPF / CNPJ</Label>
-            <Input
-              id="document"
-              type="text"
-              placeholder="000.000.000-00 ou 00.000.000/0000-00"
-              required
-            />
-          </div>
+        <form className="flex flex-col space-y-6" onSubmit={handleSubmit}>
+          {fields.map((field) => (
+            <div key={field} className="grid gap-2">
+              <Label htmlFor={field}>{fieldLabels[field] || field}</Label>
+              <Input
+                id={field}
+                type={ field === "email" ? "email" : "text" }
+                placeholder={`Digite o ${fieldLabels[field]?.toLowerCase() || field}`}
+                value={formData[field]}
+                onChange={handleChange}
+                required
+              />
+            </div>
+          ))}
 
           <div className="grid gap-2">
             <Label htmlFor="cep">CEP</Label>
             <div className="flex w-full max-w-sm items-center gap-4">
-              <InputOTPCep />
+              <InputOTPCep
+                value={formData.cep}
+                onChange={(val) => setFormData({ ...formData, cep: val })}
+                onComplete={(formatted) =>
+                  setFormData({ ...formData, cep: formatted })
+                }
+              />
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -87,13 +124,12 @@ export function ClientForm() {
               </TooltipProvider>
             </div>
           </div>
+
+          <Button type="submit" className="w-full">
+            Enviar
+          </Button>
         </form>
       </CardContent>
-      <CardFooter className="flex-col gap-2">
-        <Button type="submit" className="w-full">
-          Enviar
-        </Button>
-      </CardFooter>
     </Card>
   )
 }
