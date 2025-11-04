@@ -18,7 +18,7 @@ export function InputOTPCep({ onComplete, value, onChange }: InputOTPCepProps) {
       pattern="[0-9]*"
       inputMode="numeric"
       value={value}
-      
+
       onChange={(val: string) => onChange?.(val)}
       onComplete={(val: string) => {
         const formatted = `${val.slice(0, 5)}-${val.slice(5)}`
@@ -33,7 +33,7 @@ export function InputOTPCep({ onComplete, value, onChange }: InputOTPCepProps) {
         <InputOTPSlot index={4} />
       </InputOTPGroup>
 
-      - <InputOTPSeparator className="hidden" />
+      <InputOTPSeparator className="hidden" />
 
       <InputOTPGroup>
         <InputOTPSlot index={5} />

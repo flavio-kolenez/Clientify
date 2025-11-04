@@ -1,23 +1,21 @@
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Layout } from "@/components/Layout";
-
-import { SidebarTrigger } from "@/components/ui/sidebar"
-import { ClientForm } from "@/components/ClientForm"
+import { AddClients } from "./pages/AddClientsPage";
+import { ListClients } from "./pages/ListClientsPage";
 
 function App() {
   return (
-    <Layout>
-      <div className="relative mb-4">
-        <SidebarTrigger className="absolute mt-0 left-0 top-1/2 -translate-y-1/2" />
-        <h1 className="text-center text-2xl text-bold">Clientes</h1>
-      </div>
-
-      <hr />
-
-      <div className="flex justify-center mt-5">
-       <ClientForm />
-      </div>
-    </Layout>
+    <BrowserRouter>
+      <Routes>
+        {/* Rotas que usam o Layout base */}
+        <Route element={<Layout />}>
+          <Route path="/" element={ <ListClients />} />
+          <Route path="/clients/addClient" element={<AddClients />} />
+          <Route path="/clients/list" element={<ListClients />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
   );
-};
+}
 
 export default App;

@@ -3,7 +3,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -15,7 +14,7 @@ import { SearchCheck } from "lucide-react"
 import { InputOTPCep } from "./InputOTPCep"
 import { api } from "../../services/api"
 
-type FormFields = "name" | "email" | "phone" | "document" | "cep" | "clientType"
+type FormFields = "name" | "email" | "phone" | "document" | "cep" | "clientType";
 
 export function ClientForm() {
   const fieldLabels: Record<string, string> = {
@@ -35,12 +34,12 @@ export function ClientForm() {
     document: "",
     cep: "",
     clientType: "CPF"
-  })
+  });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target
     setFormData({ ...formData, [id]: value })
-  }
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -120,7 +119,7 @@ export function ClientForm() {
                   <TooltipContent className="bg-neutral-900 text-white px-3 py-1 rounded-md mb-2 shadow-lg">
                     <p>Validar CEP</p>
                   </TooltipContent>
-                </Tooltip>
+                </Tooltip> 
               </TooltipProvider>
             </div>
           </div>
