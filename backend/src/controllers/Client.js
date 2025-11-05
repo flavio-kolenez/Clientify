@@ -4,8 +4,6 @@ class ClientController {
     static async createClient(req, res, next) {
         const clientData = req.body;
 
-        console.log("📥 Requisição recebida:", req.body);
-
         const { clientType, document } = clientData;
 
         if (clientType === "CPF" && !/^\d{3}\.\d{3}\.\d{3}\-\d{2}$/.test(document)) {
@@ -89,6 +87,11 @@ class ClientController {
         } catch (error) {
             next(error);
         };
+    };
+
+    // controllers/clientController.js
+    static getPaginatedClients = (req, res) => {
+        res.status(200).json(res.paginatedResults);
     };
 
     static async updateClient(req, res, next) {

@@ -7,10 +7,10 @@ import cors from "cors"
 const app = express()
 
 app.use(cors({
-  origin: "http://localhost:5173", // endereço do frontend (Vite)
+  origin: "http://localhost:5173", // o endereço do teu front
   methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-}))
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
 
 app.use(express.json())
 
