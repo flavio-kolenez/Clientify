@@ -1,9 +1,20 @@
 import { useEffect, useState } from "react";
 
 import { SidebarTrigger } from "@/components/ui/sidebar";
+
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationPrevious,
+  PaginationNext,
+} from "@/components/ui/pagination";
+
 import { ClientCard } from "@/components/ClientCard";
 
 import { api } from "../../services/api";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 
 type Client = {
   _id: string;
@@ -23,10 +34,11 @@ type Client = {
 
 export function ListClients() {
   const [clients, setClients] = useState<Client[]>([]);
+  const [page, setPage] = useState(1);
 
-  const fetchClients = async () => {
+  const fetchClients = async (pageNumber = 1) => {
     try {
-      const res = await api.get("/client");
+      const res = await api.get(`http://localhost:3000/client/paginated?page=${pageNumber}&limit=6`);
       const clientsData = res.data?.data ?? [];
       setClients(clientsData);
     } catch (err) {
@@ -49,8 +61,8 @@ export function ListClients() {
   };
 
   useEffect(() => {
-    fetchClients();
-  }, []);
+    fetchClients(page);
+  }, [page]);
 
   const handleDelete = async (id: string) => {
     try {
@@ -71,8 +83,40 @@ export function ListClients() {
       <hr />
 
       <div className="p-4 mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-[1fr]">
-        { renderClients() }
+        {renderClients()}
       </div>
+
+      <Pagination className="mt-6 flex justify-center">
+        <PaginationContent>
+          <PaginationItem>
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className={page === 1 ? "pointer-events-none opacity-50 px-3 py-1 rounded" : "px-3 py-1 rounded"}
+            >
+              <div className="flex items-center gap-3">
+                              <ArrowLeft />Anterior 
+
+              </div>
+            </button>
+          </PaginationItem>
+          <PaginationItem>
+            <PaginationLink isActive>{page}</PaginationLink>
+          </PaginationItem>
+          <PaginationItem>
+            <button
+              onClick={() => setPage((p) => p + 1)}
+              className="px-3 py-1 rounded"
+            >
+                            <div className="flex items-center gap-3">
+
+              Próximo <ArrowRight />
+
+              </div>
+            </button>
+          </PaginationItem>
+        </PaginationContent>
+      </Pagination>
     </>
   );
 }

@@ -38,7 +38,7 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogCancel,
-} from "@/components/ui/alert-dialog"
+} from "@/components/ui/alert-dialog";
 
 // Schema de validação
 const formSchema = z.object({
@@ -48,7 +48,7 @@ const formSchema = z.object({
   document: z.string().min(11, "Documento deve ter pelo menos 11 caracteres"),
   cep: z.string().length(8, "CEP inválido! Deve conter 8 dígitos numéricos."),
   clientType: z.enum(["CPF", "CNPJ"]),
-})
+});
 
 type FormValues = z.infer<typeof formSchema>
 
@@ -99,8 +99,8 @@ export function ClientForm() {
       })
       console.error("Erro ao validar CEP:", err)
       return false
-    }
-  }
+    };
+  };
 
   // ----------------------------- SUBMIT ---------------------------------
   const onSubmit = async (values: FormValues) => {
@@ -124,10 +124,10 @@ export function ClientForm() {
       address: {
         postalCode: values.cep,
       },
-    }
+    };
 
     try {
-      const res = await api.post("/client", payload)
+      const res = await api.post("/client", payload);
 
       if (res.status === 201) {
         setDialogType("success")
@@ -160,7 +160,6 @@ export function ClientForm() {
     }
   }
 
-  // ----------------------------- JSX ---------------------------------
   return (
     <>
       <Card className="w-full max-w-md shadow-lg">
@@ -293,7 +292,6 @@ export function ClientForm() {
         </CardContent>
       </Card>
 
-      {/* ⬇️ ALERT DIALOG — fora do form, mas no mesmo componente */}
       <AlertDialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
