@@ -20,7 +20,7 @@ import {
   AlertDialogAction,
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
-import { Mail, Phone, MapPin, Trash2, Heart, Pencil, Check, Ellipsis, Dot } from "lucide-react"
+import { Mail, Phone, MapPin, Trash2, Heart, Pencil, Check, Ellipsis } from "lucide-react"
 
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
