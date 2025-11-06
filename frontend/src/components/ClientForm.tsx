@@ -1,7 +1,6 @@
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
 import {
   Card,
   CardContent,
@@ -27,8 +26,6 @@ import {
 } from "@radix-ui/react-tooltip"
 import { SearchCheck } from "lucide-react"
 import { InputOTPCep } from "./InputOTPCep"
-import { api } from "../../services/api"
-import { validateCep } from "../../services/addressServices"
 
 import {
   AlertDialog,
@@ -40,19 +37,65 @@ import {
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
 
-// Schema de validação
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+import * as z from "zod";
+
+import { api } from "../../services/api";
+import { validateCep } from "../../services/addressServices";
+import { formatDocument } from "@/utils/utils";
+
 const formSchema = z.object({
   name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
   email: z.string().email("Email inválido"),
   phone: z.string().min(10, "Telefone deve ter pelo menos 10 dígitos"),
   document: z.string().min(11, "Documento deve ter pelo menos 11 caracteres"),
   cep: z.string().length(8, "CEP inválido! Deve conter 8 dígitos numéricos."),
+  street: z.string().min(2, "Rua obrigatória"),
+  city: z.string().min(2, "Cidade obrigatória"),
+  state: z.string().length(2, "Selecione o estado"),
   clientType: z.enum(["CPF", "CNPJ"]),
 });
 
 type FormValues = z.infer<typeof formSchema>
 
 export function ClientForm() {
+  const states = [
+    { value: "AC", label: "Acre" },
+    { value: "AL", label: "Alagoas" },
+    { value: "AP", label: "Amapá" },
+    { value: "AM", label: "Amazonas" },
+    { value: "BA", label: "Bahia" },
+    { value: "CE", label: "Ceará" },
+    { value: "DF", label: "Distrito Federal" },
+    { value: "ES", label: "Espírito Santo" },
+    { value: "GO", label: "Goiás" },
+    { value: "MA", label: "Maranhão" },
+    { value: "MT", label: "Mato Grosso" },
+    { value: "MS", label: "Mato Grosso do Sul" },
+    { value: "MG", label: "Minas Gerais" },
+    { value: "PA", label: "Pará" },
+    { value: "PB", label: "Paraíba" },
+    { value: "PR", label: "Paraná" },
+    { value: "PE", label: "Pernambuco" },
+    { value: "PI", label: "Piauí" },
+    { value: "RJ", label: "Rio de Janeiro" },
+    { value: "RN", label: "Rio Grande do Norte" },
+    { value: "RS", label: "Rio Grande do Sul" },
+    { value: "RO", label: "Rondônia" },
+    { value: "RR", label: "Roraima" },
+    { value: "SC", label: "Santa Catarina" },
+    { value: "SP", label: "São Paulo" },
+    { value: "SE", label: "Sergipe" },
+    { value: "TO", label: "Tocantins" },
+  ];
+
   // ----------------------------- ESTADOS ---------------------------------
   const [dialogOpen, setDialogOpen] = useState(false)
   const [dialogType, setDialogType] = useState<"success" | "error" | null>(null)
@@ -61,7 +104,7 @@ export function ClientForm() {
   const [cepStatus, setCepStatus] = useState<"default" | "valid" | "invalid">(
     "default"
   )
-  const [formError, setFormError] = useState<string | null>(null)
+  const [formError, setFormError] = useState<string | null>(null);
 
   // ----------------------------- FORM HOOK ---------------------------------
   const form = useForm<FormValues>({
@@ -72,9 +115,12 @@ export function ClientForm() {
       phone: "",
       document: "",
       cep: "",
+      street: "",
+      city: "",
+      state: "",
       clientType: "CPF",
     },
-  })
+  });
 
   // ----------------------------- FUNÇÕES ---------------------------------
   const handleValidateCep = async (cep: string) => {
@@ -90,6 +136,10 @@ export function ClientForm() {
       }
       setCepStatus("valid")
       form.clearErrors("cep")
+      // Preencher automaticamente os campos de endereço
+      if (res.logradouro) form.setValue("street", res.logradouro)
+      if (res.localidade) form.setValue("city", res.localidade)
+      if (res.uf) form.setValue("state", res.uf)
       return true
     } catch (err) {
       setCepStatus("invalid")
@@ -99,8 +149,8 @@ export function ClientForm() {
       })
       console.error("Erro ao validar CEP:", err)
       return false
-    };
-  };
+    }
+  }
 
   // ----------------------------- SUBMIT ---------------------------------
   const onSubmit = async (values: FormValues) => {
@@ -123,8 +173,13 @@ export function ClientForm() {
       clientType: values.clientType,
       address: {
         postalCode: values.cep,
+        street: values.street,
+        city: values.city,
+        state: values.state,
       },
     };
+
+    console.log(payload);
 
     try {
       const res = await api.post("/client", payload);
@@ -225,15 +280,40 @@ export function ClientForm() {
               <FormField
                 control={form.control}
                 name="document"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>CPF / CNPJ</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Digite o documento" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                render={({ field }) => {
+                  const documentValue = form.watch("document")
+                  const isValidCPF = /^\d{3}\.\d{3}\.\d{3}-\d{2}$/.test(documentValue)
+                  const isValidCNPJ = /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/.test(documentValue)
+
+                  return (
+                    <FormItem>
+                      <FormLabel>CPF / CNPJ</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Digite o documento"
+                          maxLength={18}
+                          {...field}
+                          onChange={(e) => {
+                            const { formatted, type } = formatDocument(e.target.value)
+                            field.onChange(formatted)
+                            if (type === "CPF" || type === "CNPJ") {
+                              form.setValue("clientType", type)
+                            }
+                          }}
+                        />
+                      </FormControl>
+
+                      {/* mostra o tipo detectado apenas se for válido */}
+                      {(isValidCPF || isValidCNPJ) && (
+                        <div className="text-xs text-gray-500">
+                          Tipo detectado: {form.watch("clientType")}
+                        </div>
+                      )}
+
+                      <FormMessage />
+                    </FormItem>
+                  )
+                }}
               />
 
               <FormField
@@ -276,6 +356,58 @@ export function ClientForm() {
                 )}
               />
 
+              {/* Endereço */}
+              <FormField
+                control={form.control}
+                name="street"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Rua</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Digite a rua" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="city"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Cidade</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Cidade" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="state"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Estado</FormLabel>
+                    <FormControl>
+                      <Select value={field.value} onValueChange={field.onChange}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o estado" />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-52">
+                          {states.map((state) => (
+                            <SelectItem key={state.value} value={state.value}>
+                              {state.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               {formError && (
                 <div className="mb-2">
                   <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded text-xs">
@@ -296,7 +428,7 @@ export function ClientForm() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {dialogType === "success" ? "Sucesso" : "Erro"}
+              {dialogType === "success" ? "Sucesso ✅" : "Erro ❌"}
             </AlertDialogTitle>
             <AlertDialogDescription>{dialogMessage}</AlertDialogDescription>
           </AlertDialogHeader>

@@ -20,8 +20,6 @@ import {
   AlertDialogAction,
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
-import { Mail, Phone, MapPin, Trash2, Heart, Pencil, Check, Ellipsis } from "lucide-react"
-
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
@@ -34,6 +32,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
+import { Mail, Phone, MapPin, Trash2, Heart, Pencil, Check, Ellipsis } from "lucide-react"
 
 interface ClientCardProps {
   client: {
@@ -104,11 +103,11 @@ export function ClientCard({ client, onDelete }: ClientCardProps) {
 
           <div className="flex flex-col gap-1 text-right">
             <Badge
-              variant={client.isActive ? "default" : "secondary"}
+              variant="outline"
               className={
                 client.isActive
-                  ? "bg-green-500 text-white"
-                  : "bg-gray-400 text-white"
+                  ? "border-green-500 text-green-500"
+                  : "border-gray-400 text-gray-400"
               }
             >
               {client.isActive ? "Ativo" : "Inativo"}
@@ -146,7 +145,7 @@ export function ClientCard({ client, onDelete }: ClientCardProps) {
               <Button
                 variant="outline"
                 size="sm"
-                className="gap-2 text-xs h-8 px-2 bg-red-600 text-white hover:bg-red-700 hover:text-white"
+                className="gap-2 text-xs h-8 px-2 border-red-600 text-red-600 hover:bg-red-100 hover:text-red-700"
 
               >
                 <Trash2 size={14} />
@@ -179,7 +178,7 @@ export function ClientCard({ client, onDelete }: ClientCardProps) {
             <SheetTrigger asChild>
               <Button variant="outline"
                 size="sm"
-                className="text-xs h-8 px-2 bg-violet-600 hover:bg-violet-700 hover:text-white text-white"
+                className="text-xs h-8 px-2 border-violet-600 text-violet-600 hover:bg-violet-100 hover:text-violet-700"
               >
                 <Pencil />
                 Editar
