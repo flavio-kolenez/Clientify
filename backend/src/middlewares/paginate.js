@@ -10,8 +10,6 @@ export const paginate = (model) => {
         model.countDocuments()
       ]);
 
-      console.log("Paginate results count:", results.length, "Total:", total);
-
       res.paginatedResults = {
         total,
         page: Number(page),

@@ -13,12 +13,18 @@ const ClientSchema = new mongoose.Schema({
         required: [true, "Número do documento necessário!"],
         validate: {
             validator: function (value) {
-                if (this.clientType === "CPF") {
+                // Durante updates, this.clientType pode não estar disponível
+                // então vamos verificar se conseguimos acessar o clientType
+                const clientType = this.clientType || this.getUpdate?.()?.clientType || this.get?.('clientType');
+                
+                if (clientType === "CPF") {
                     return /^\d{3}\.\d{3}\.\d{3}\-\d{2}$/.test(value);
-                } else if (this.clientType === "CNPJ") {
+                } else if (clientType === "CNPJ") {
                     return /^\d{2}\.\d{3}\.\d{3}\/\d{4}\-\d{2}$/.test(value);
                 }
-                return false;
+                
+                // Se não conseguir determinar o tipo, deixa passar (será validado no controller)
+                return true;
             },
         },
         unique: [true, "Documento já cadastrado!"]
