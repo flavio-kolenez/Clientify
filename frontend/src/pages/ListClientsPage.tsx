@@ -48,7 +48,12 @@ export function ListClients() {
   const renderClients = () => {
     if (clients.length > 0) {
       return clients.map((client) => (
-        <ClientCard key={client._id} client={client} onDelete={handleDelete} />
+        <ClientCard 
+          key={client._id} 
+          client={client} 
+          onDelete={handleDelete}
+          onUpdate={() => fetchClients(page)}
+        />
       ));
     } else {
       return (

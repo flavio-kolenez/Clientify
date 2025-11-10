@@ -1,3 +1,4 @@
+import { useState } from "react"
 import {
   Card,
   CardHeader,
@@ -20,19 +21,10 @@ import {
   AlertDialogAction,
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet"
-import { Mail, Phone, MapPin, Trash2, Heart, Pencil, Check, Ellipsis } from "lucide-react"
+import { Mail, Phone, MapPin, Trash2, Heart, Pencil, MoreHorizontal } from "lucide-react"
+import { ClientForm } from "./ClientForm"
+import { SheetComponent } from "./SheetComponent"
+import { string } from "zod"
 
 interface ClientCardProps {
   client: {
@@ -51,10 +43,14 @@ interface ClientCardProps {
     isActive: boolean
   }
   onDelete?: (id: string) => void
+  onUpdate?: (id: string) => void // Nova prop para callback quando atualizar
 }
 
 
-export function ClientCard({ client, onDelete }: ClientCardProps) {
+export function ClientCard({ client, onDelete, onUpdate }: ClientCardProps) {
+  const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  
   const initial = client.name.charAt(0).toUpperCase()
   const isTata = ["Tata", "Thainara", "Tata <3"].includes(client.name)
 
@@ -69,6 +65,12 @@ export function ClientCard({ client, onDelete }: ClientCardProps) {
   ];
 
   const randomColor = bgColors[Math.floor(Math.random() * bgColors.length)]
+
+  const handleEditSuccess = () => {
+    setIsEditSheetOpen(false);
+    setShowSuccessAlert(true);
+    onUpdate?.(client._id); 
+  };
 
   return (
     <Card className="w-full h-full min-h-[200px] flex flex-col justify-between hover:shadow-lg transition-shadow overflow-hidden">
@@ -107,7 +109,7 @@ export function ClientCard({ client, onDelete }: ClientCardProps) {
               className={
                 client.isActive
                   ? "border-green-500 text-green-500"
-                  : "border-gray-400 text-gray-400"
+                  : "border-red-400 text-red-400"
               }
             >
               {client.isActive ? "Ativo" : "Inativo"}
@@ -137,7 +139,7 @@ export function ClientCard({ client, onDelete }: ClientCardProps) {
       </CardContent>
 
       <CardFooter className="p-5 pt-1 flex justify-between gap-2 mt-auto">
-        <Ellipsis className="text-neutral-500 ml-2 hover:animate-bounce hover:text-neutral-900" size={15}/>
+        <MoreHorizontal className="text-neutral-500 ml-2 hover:animate-bounce hover:text-neutral-900" size={15} />
 
         <div className="gap-2 flex">
           <AlertDialog>
@@ -156,7 +158,7 @@ export function ClientCard({ client, onDelete }: ClientCardProps) {
               <AlertDialogHeader>
                 <AlertDialogTitle>Excluir cliente</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Tem certeza que deseja excluir <b>{client.name}</b>?
+                  Tem certeza que deseja excluir o cliente <i><b>{client.name}</b></i>? <br />
                   Essa ação não poderá ser desfeita.
                 </AlertDialogDescription>
               </AlertDialogHeader>
@@ -172,10 +174,10 @@ export function ClientCard({ client, onDelete }: ClientCardProps) {
             </AlertDialogContent>
           </AlertDialog>
 
-            {/* tem que atualizar essa bomba pra usar o SheetComponent!!! */}
-
-          <Sheet>
-            <SheetTrigger asChild>
+          <SheetComponent
+            open={isEditSheetOpen}
+            onOpenChange={setIsEditSheetOpen}
+            trigger={
               <Button variant="outline"
                 size="sm"
                 className="text-xs h-8 px-2 border-violet-600 text-violet-600 hover:bg-violet-100 hover:text-violet-700"
@@ -183,64 +185,48 @@ export function ClientCard({ client, onDelete }: ClientCardProps) {
                 <Pencil />
                 Editar
               </Button>
-            </SheetTrigger>
-            <SheetContent>
-              <SheetHeader className="mt-0">
-                <SheetTitle>Editar perfil do cliente</SheetTitle>
-                <SheetDescription>
-                  Digite os novos dados do cliente!
-                </SheetDescription>
-              </SheetHeader>
-
-              <div className="grid flex-1 auto-rows-min mt-5 gap-5 px-4">
-                <div className="grid gap-1">
-                  <Label htmlFor="sheet-demo-name">Name</Label>
-                  <Input id="sheet-demo-name" defaultValue="Pedro Duarte" />
-                </div>
-                <div className="grid gap-1">
-                  <Label htmlFor="sheet-demo-username">Username</Label>
-                  <Input id="sheet-demo-username" defaultValue="@peduarte" />
-                </div>
-              </div>
-              <SheetFooter className="mt-5 flex !justify-around">
-                <AlertDialog>
-                  <SheetClose asChild>
-                    <Button variant="outline">Cancelar</Button>
-                  </SheetClose>
-
-                  <AlertDialogTrigger asChild>
-                    <Button variant="outline"
-                      className="text-sm bg-emerald-500 hover:bg-emerald-600 text-white hover:text-white"
-                    >
-                      <Check /> Confirmar alterações
-                    </Button>
-                  </AlertDialogTrigger>
-
-                  <AlertDialogContent className="sm:max-w-[400px]">
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Confirmar alterações</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Tem certeza que deseja alterar os <br /> dados do cliente <b>{client.name}</b>?
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => onDelete && onDelete(client._id)}
-                        className="bg-emerald-500 hover:bg-emerald-600"
-                      >
-                        <Check />
-                        Confirmar
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </SheetFooter>
-            </SheetContent>
-          </Sheet>
-          
-</div>
+            }
+            title="Editar Cliente"
+            description="Atualize as informações do cliente abaixo."
+          >
+            <ClientForm
+              showCard={false}
+              isEditMode={true}
+              clientId={client._id}
+              onSuccess={handleEditSuccess}
+              showInternalAlert={false}
+              initialData={{
+                name: client.name,
+                email: client.email,
+                phone: client.phone,
+                document: client.document,
+                clientType: client.clientType,
+                cep: client.address.postalCode,
+                street: client.address.street,
+                city: client.address.city,
+                state: client.address.state,
+              }}
+            />
+          </SheetComponent>
+        </div>
       </CardFooter>
+
+      {/* AlertDialog de sucesso para edição - separado do Sheet */}
+      <AlertDialog open={showSuccessAlert} onOpenChange={setShowSuccessAlert}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Sucesso ✅</AlertDialogTitle>
+            <AlertDialogDescription>
+              Cliente atualizado com sucesso!
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowSuccessAlert(false)}>
+              Fechar
+            </AlertDialogCancel>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   )
 }

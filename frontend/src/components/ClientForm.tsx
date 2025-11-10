@@ -65,7 +65,27 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>
 
-export function ClientForm() {
+interface ClientFormProps {
+  title?: string;
+  description?: string;
+  initialData?: Partial<FormValues>;
+  onSuccess?: () => void;
+  isEditMode?: boolean;
+  clientId?: string;
+  showCard?: boolean; // Para controlar se mostra o Card wrapper ou não
+  showInternalAlert?: boolean; // Para controlar se mostra o AlertDialog interno
+}
+
+export function ClientForm({ 
+  title = "Cadastro de clientes", 
+  description = "Preencha as informações do cliente!",
+  initialData = {},
+  onSuccess,
+  isEditMode = false,
+  clientId,
+  showCard = true,
+  showInternalAlert = true
+}: ClientFormProps) {
   const states = [
     { value: "AC", label: "Acre" },
     { value: "AL", label: "Alagoas" },
@@ -110,15 +130,15 @@ export function ClientForm() {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
-      email: "",
-      phone: "",
-      document: "",
-      cep: "",
-      street: "",
-      city: "",
-      state: "",
-      clientType: "CPF",
+      name: initialData.name || "",
+      email: initialData.email || "",
+      phone: initialData.phone || "",
+      document: initialData.document || "",
+      cep: initialData.cep || "",
+      street: initialData.street || "",
+      city: initialData.city || "",
+      state: initialData.state || "",
+      clientType: initialData.clientType || "CPF",
     },
   });
 
@@ -182,16 +202,28 @@ export function ClientForm() {
     console.log(payload);
 
     try {
-      const res = await api.post("/client", payload);
-
-      if (res.status === 201) {
-        setDialogType("success")
-        setDialogMessage("Cliente cadastrado com sucesso!")
-        form.reset()
-        setCepStatus("default")
+      let res;
+      if (isEditMode && clientId) {
+        res = await api.put(`/client/${clientId}`, payload);
       } else {
-        setDialogType("error")
-        setDialogMessage("Erro inesperado ao cadastrar cliente.")
+        res = await api.post("/client", payload);
+      }
+
+      if (res.status === 200 || res.status === 201) {
+        if (showInternalAlert) {
+          setDialogType("success")
+          setDialogMessage(isEditMode ? "Cliente atualizado com sucesso!" : "Cliente cadastrado com sucesso!")
+        }
+        if (!isEditMode) {
+          form.reset()
+          setCepStatus("default")
+        }
+        onSuccess?.(); // Chama callback se fornecido
+      } else {
+        if (showInternalAlert) {
+          setDialogType("error")
+          setDialogMessage("Erro inesperado ao processar cliente.")
+        }
       }
     } catch (err: any) {
       if (err.response?.data?.errors) {
@@ -203,242 +235,261 @@ export function ClientForm() {
         })
       } else if (err.response?.data?.message) {
         setFormError(err.response.data.message)
-        setDialogMessage(err.response.data.message)
+        if (showInternalAlert) {
+          setDialogMessage(err.response.data.message)
+        }
       } else {
-        setFormError("Erro ao cadastrar cliente.")
-        setDialogMessage("Erro ao cadastrar cliente.")
+        setFormError(`Erro ao ${isEditMode ? 'atualizar' : 'cadastrar'} cliente.`)
+        if (showInternalAlert) {
+          setDialogMessage(`Erro ao ${isEditMode ? 'atualizar' : 'cadastrar'} cliente.`)
+        }
       }
 
-      setDialogType("error")
+      if (showInternalAlert) {
+        setDialogType("error")
+      }
     } finally {
-      setDialogOpen(true)
+      if (showInternalAlert) {
+        setDialogOpen(true)
+      }
     }
   }
 
+  // Componente do formulário sem o Card wrapper
+  const FormContent = (
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="flex flex-col space-y-4"
+      >
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nome</FormLabel>
+              <FormControl>
+                <Input placeholder="Digite o nome" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input
+                  type="email"
+                  placeholder="Digite o email"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="phone"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Telefone</FormLabel>
+              <FormControl>
+                <Input maxLength={10} placeholder="Digite o telefone" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="document"
+          render={({ field }) => {
+            const documentValue = form.watch("document")
+            const isValidCPF = /^\d{3}\.\d{3}\.\d{3}-\d{2}$/.test(documentValue)
+            const isValidCNPJ = /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/.test(documentValue)
+
+            return (
+              <FormItem>
+                <FormLabel>CPF / CNPJ</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Digite o documento"
+                    maxLength={18}
+                    {...field}
+                    onChange={(e) => {
+                      const { formatted, type } = formatDocument(e.target.value)
+                      field.onChange(formatted)
+                      if (type === "CPF" || type === "CNPJ") {
+                        form.setValue("clientType", type)
+                      }
+                    }}
+                  />
+                </FormControl>
+
+                {/* mostra o tipo detectado apenas se for válido */}
+                {(isValidCPF || isValidCNPJ) && (
+                  <div className="text-xs text-gray-500">
+                    Tipo detectado: {form.watch("clientType")}
+                  </div>
+                )}
+
+                <FormMessage />
+              </FormItem>
+            )
+          }}
+        />
+
+        <FormField
+          control={form.control}
+          name="cep"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>CEP</FormLabel>
+              <div className={`flex w-full items-center gap-2 ${showCard ? 'max-w-sm' : ''}`}>
+                <FormControl>
+                  <InputOTPCep
+                    value={field.value}
+                    onChange={(val) => {
+                      field.onChange(val)
+                      setCepStatus("default")
+                    }}
+                    status={cepStatus}
+                  />
+                </FormControl>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="w-10 h-10 flex items-center justify-center shrink-0"
+                        onClick={() => handleValidateCep(field.value)}
+                      >
+                        <SearchCheck className="w-4 h-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent className="bg-neutral-900 text-white px-3 py-1 rounded-md mb-2 shadow-lg">
+                      <p>Validar CEP</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Endereço */}
+        <FormField
+          control={form.control}
+          name="street"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Rua</FormLabel>
+              <FormControl>
+                <Input placeholder="Digite a rua" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="city"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Cidade</FormLabel>
+              <FormControl>
+                <Input placeholder="Cidade" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="state"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Estado</FormLabel>
+              <FormControl>
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o estado" />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-52">
+                    {states.map((state) => (
+                      <SelectItem key={state.value} value={state.value}>
+                        {state.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {formError && (
+          <div className="mb-2">
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded text-xs">
+              {formError}
+            </div>
+          </div>
+        )}
+
+        <Button type="submit" className="w-full">
+          {isEditMode ? "Atualizar" : "Enviar"}
+        </Button>
+      </form>
+    </Form>
+  );
+
   return (
     <>
-      <Card className="w-full max-w-md shadow-lg">
-        <CardHeader>
-          <CardTitle>Cadastro de clientes</CardTitle>
-          <CardDescription>
-            Preencha as informações do cliente!
-          </CardDescription>
-        </CardHeader>
+      {showCard ? (
+        <Card className="w-full max-w-md shadow-lg">
+          <CardHeader>
+            <CardTitle>{title}</CardTitle>
+            <CardDescription>{description}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {FormContent}
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="w-full space-y-4">
+          {FormContent}
+        </div>
+      )}
 
-        <CardContent>
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="flex flex-col space-y-4"
-            >
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nome</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Digite o nome" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="email"
-                        placeholder="Digite o email"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="phone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Telefone</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Digite o telefone" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="document"
-                render={({ field }) => {
-                  const documentValue = form.watch("document")
-                  const isValidCPF = /^\d{3}\.\d{3}\.\d{3}-\d{2}$/.test(documentValue)
-                  const isValidCNPJ = /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/.test(documentValue)
-
-                  return (
-                    <FormItem>
-                      <FormLabel>CPF / CNPJ</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Digite o documento"
-                          maxLength={18}
-                          {...field}
-                          onChange={(e) => {
-                            const { formatted, type } = formatDocument(e.target.value)
-                            field.onChange(formatted)
-                            if (type === "CPF" || type === "CNPJ") {
-                              form.setValue("clientType", type)
-                            }
-                          }}
-                        />
-                      </FormControl>
-
-                      {/* mostra o tipo detectado apenas se for válido */}
-                      {(isValidCPF || isValidCNPJ) && (
-                        <div className="text-xs text-gray-500">
-                          Tipo detectado: {form.watch("clientType")}
-                        </div>
-                      )}
-
-                      <FormMessage />
-                    </FormItem>
-                  )
-                }}
-              />
-
-              <FormField
-                control={form.control}
-                name="cep"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>CEP</FormLabel>
-                    <div className="flex w-full max-w-sm items-center gap-4">
-                      <FormControl>
-                        <InputOTPCep
-                          value={field.value}
-                          onChange={(val) => {
-                            field.onChange(val)
-                            setCepStatus("default")
-                          }}
-                          status={cepStatus}
-                        />
-                      </FormControl>
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              className="w-10 h-10 flex items-center justify-center"
-                              onClick={() => handleValidateCep(field.value)}
-                            >
-                              <SearchCheck className="w-6 h-6" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent className="bg-neutral-900 text-white px-3 py-1 rounded-md mb-2 shadow-lg">
-                            <p>Validar CEP</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </div>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Endereço */}
-              <FormField
-                control={form.control}
-                name="street"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Rua</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Digite a rua" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="city"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Cidade</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Cidade" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="state"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Estado</FormLabel>
-                    <FormControl>
-                      <Select value={field.value} onValueChange={field.onChange}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione o estado" />
-                        </SelectTrigger>
-                        <SelectContent className="max-h-52">
-                          {states.map((state) => (
-                            <SelectItem key={state.value} value={state.value}>
-                              {state.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {formError && (
-                <div className="mb-2">
-                  <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded text-xs">
-                    {formError}
-                  </div>
-                </div>
-              )}
-
-              <Button type="submit" className="w-full">
-                Enviar
-              </Button>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
-
-      <AlertDialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              {dialogType === "success" ? "Sucesso ✅" : "Erro ❌"}
-            </AlertDialogTitle>
-            <AlertDialogDescription>{dialogMessage}</AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setDialogOpen(false)}>
-              Fechar
-            </AlertDialogCancel>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {/* Só mostra o AlertDialog se showInternalAlert for true */}
+      {showInternalAlert && (
+        <AlertDialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                {dialogType === "success" ? "Sucesso ✅" : "Erro ❌"}
+              </AlertDialogTitle>
+              <AlertDialogDescription>{dialogMessage}</AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setDialogOpen(false)}>
+                Fechar
+              </AlertDialogCancel>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
     </>
   )
 }
