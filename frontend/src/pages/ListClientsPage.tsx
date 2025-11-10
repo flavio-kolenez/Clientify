@@ -7,14 +7,13 @@ import {
   PaginationContent,
   PaginationItem,
   PaginationLink,
-  PaginationPrevious,
-  PaginationNext,
 } from "@/components/ui/pagination";
 
 import { ClientCard } from "@/components/ClientCard";
 
 import { api } from "../../services/api";
 import { ArrowLeft, ArrowRight } from "lucide-react";
+import { EmptyComponent } from "@/components/EmptyComponent";
 
 type Client = {
   _id: string;
@@ -53,9 +52,9 @@ export function ListClients() {
       ));
     } else {
       return (
-        <p className="text-center text-gray-500 col-span-full">
-          Nenhum cliente encontrado.
-        </p>
+        <div className="flex justify-center">
+          <EmptyComponent />
+        </div>
       );
     }
   };
@@ -82,41 +81,50 @@ export function ListClients() {
 
       <hr />
 
-      <div className="p-4 mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-[1fr]">
-        {renderClients()}
-      </div>
+      {clients.length > 0 ? (
+        <>
+          <div className="p-4 mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-[1fr]">
+            {renderClients()}
+          </div>
 
-      <Pagination className="mt-6 flex justify-center">
-        <PaginationContent>
-          <PaginationItem>
-            <button
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page === 1}
-              className={page === 1 ? "pointer-events-none opacity-50 px-3 py-1 rounded" : "px-3 py-1 rounded"}
-            >
-              <div className="flex items-center gap-3">
-                              <ArrowLeft />Anterior 
+          <Pagination className="mt-6 flex justify-center">
+            <PaginationContent>
+              <PaginationItem>
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  className={page === 1 ? "pointer-events-none opacity-50 px-3 py-1 rounded" : "px-3 py-1 rounded"}
+                >
+                  <div className="flex items-center gap-3">
+                    <ArrowLeft /> Anterior
+                  </div>
+                </button>
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationLink isActive>{page}</PaginationLink>
+              </PaginationItem>
+              <PaginationItem>
+                <button
+                  onClick={() => setPage((p) => p + 1)}
+                  disabled={clients.length < 6}
+                  className={clients.length < 6 ? "pointer-events-none opacity-50 px-3 py-1 rounded" : "px-3 py-1 rounded"}
+                >
+                  <div className="flex items-center gap-3">
 
-              </div>
-            </button>
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationLink isActive>{page}</PaginationLink>
-          </PaginationItem>
-          <PaginationItem>
-            <button
-              onClick={() => setPage((p) => p + 1)}
-              className="px-3 py-1 rounded"
-            >
-                            <div className="flex items-center gap-3">
+                    Próximo <ArrowRight />
 
-              Próximo <ArrowRight />
-
-              </div>
-            </button>
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
+                  </div>
+                </button>
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </>
+      ) : (
+          <div className="flex justify-center items-center h-[60vh]">
+            <EmptyComponent />
+          </div>
+        )
+      }
     </>
   );
 }
