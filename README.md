@@ -1,4 +1,4 @@
-# 🏢 Clientify
+# Clientify
 
 <div align="center">
 
@@ -13,119 +13,115 @@
 
 ---
 
-## 📋 Sobre o Projeto
+## Sobre o Projeto
 
-O **Clientify** é uma aplicação web completa para gerenciamento de clientes, desenvolvida com tecnologias modernas. Permite cadastro, edição, visualização e exclusão de clientes com validação completa de CPF/CNPJ e integração com API de CEP.
+O Clientify é uma aplicação web desenvolvida para facilitar o gerenciamento de clientes. A aplicação oferece uma interface moderna e intuitiva, com validações robustas e integração com APIs externas para autocompletar dados.
 
-### ✨ Principais Funcionalidades
+### Principais Funcionalidades
 
-- 🆕 **Cadastro de Clientes** - Interface intuitiva com validação em tempo real
-- 📊 **Listagem Paginada** - Visualização organizada com paginação automática  
-- ✏️ **Edição Inline** - Edição rápida através de modais deslizantes
-- 🗑️ **Exclusão Segura** - Confirmação antes de remover registros
-- 🔍 **Validação de Documentos** - CPF e CNPJ com formatação automática
-- 📍 **Busca de Endereço** - Preenchimento automático via CEP
-- 📱 **Design Responsivo** - Funciona perfeitamente em mobile e desktop
+- Cadastro completo de clientes com validação em tempo real
+- Sistema de listagem com paginação e filtros
+- Edição rápida através de modais laterais
+- Exclusão segura com confirmação
+- Validação automática de CPF e CNPJ
+- Preenchimento automático de endereço via CEP
+- Interface responsiva para desktop e mobile
+- Sistema de filtros por nome, email, tipo e status
 
 ---
 
-## 🚀 Tecnologias Utilizadas
+## Tecnologias Utilizadas
 
 ### Frontend
-- **React 18** + **TypeScript** - Interface moderna e type-safe
-- **Vite** - Build tool ultrarrápido
-- **shadcn/ui** - Componentes de UI elegantes e acessíveis
-- **Tailwind CSS** - Estilização utility-first
-- **React Hook Form** + **Zod** - Validação de formulários robusta
-- **Lucide React** - Ícones consistentes e modernos
-- **Axios** - Cliente HTTP para API
+- **React** com **TypeScript**
+- **Vite** como build tool para desenvolvimento rápido
+- **shadcn/ui** para componentes de interface
+- **Tailwind CSS** para estilização 
+- **React Hook Form** com **Zod** para validação de formulários
+- **Lucide React** para ícones consistentes
+- **Axios** para comunicação com a API
 
 ### Backend
-- **Node.js** + **Express** - Servidor web performático
-- **MongoDB** + **Mongoose** - Banco de dados NoSQL
-- **Cors** - Controle de acesso entre origens
-- **Dotenv** - Gerenciamento de variáveis de ambiente
+- **Node.js** com **Express** para o servidor web
+- **MongoDB** com **Mongoose** para persistência de dados
+- **Cors** para controle de acesso da API
+- **Middlewares** customizados para paginação e tratamento de erros
 
 ---
 
-## 📁 Estrutura do Projeto
+## Estrutura do Projeto
 
 ```
 Clientify/
-├── 📂 backend/
-│   ├── 📂 src/
-│   │   ├── 📂 config/          # Configurações do banco
-│   │   ├── 📂 controllers/     # Controladores da API
-│   │   ├── 📂 middlewares/     # Middlewares customizados
-│   │   ├── 📂 models/          # Esquemas do MongoDB
-│   │   └── 📂 routes/          # Definição das rotas
-│   ├── 📄 app.js               # Configuração do Express
-│   └── 📄 server.js            # Inicialização do servidor
+├── backend/
+│   ├── src/
+│   │   ├── config/          # Configurações do banco de dados
+│   │   ├── controllers/     # Lógica de negócio da API
+│   │   ├── middlewares/     # Middlewares customizados
+│   │   ├── models/          # Esquemas do MongoDB
+│   │   └── routes/          # Definição das rotas da API
+│   ├── app.js               # Configuração do Express
+│   └── server.js            # Ponto de entrada do servidor
 │
-└── 📂 frontend/
-    ├── 📂 src/
-    │   ├── 📂 components/      # Componentes reutilizáveis
-    │   ├── 📂 pages/           # Páginas da aplicação
-    │   ├── 📂 services/        # Serviços de API
-    │   └── 📂 utils/           # Utilitários e helpers
-    └── 📄 vite.config.ts       # Configuração do Vite
+└── frontend/
+    ├── src/
+    │   ├── components/      # Componentes React reutilizáveis
+    │   ├── pages/           # Páginas principais da aplicação
+    │   ├── services/        # Serviços para comunicação com API
+    │   └── utils/           # Funções utilitárias
+    └── vite.config.ts       # Configuração do ambiente de desenvolvimento
 ```
 
 ---
 
-## 🛠️ Instalação e Execução
+## Instalação e Execução
 
 ### Pré-requisitos
-- **Node.js** 18+ 
-- **MongoDB** rodando localmente ou na nuvem
-- **npm** ou **yarn**
+- Node.js versão 18 ou superior
+- MongoDB em execução (local ou remoto)
+- npm ou yarn instalado
 
-### 1️⃣ Clonando o Repositório
-```bash
-git clone https://github.com/flavio-kolenez/Clientify.git
-cd Clientify
-```
-
-### 2️⃣ Configurando o Backend
+### Configuração do Backend
 ```bash
 cd backend
 npm install
 
-# Configurar variáveis de ambiente
+# Configure as variáveis de ambiente
 cp .env.example .env
-# Edite o .env com suas configurações do MongoDB
+# Edite o arquivo .env com a URL do seu MongoDB
 
-# Iniciar o servidor
+# Inicie o servidor de desenvolvimento
 npm run dev
 ```
-**🌐 Backend estará rodando em**: `http://localhost:3000`
+O backend estará disponível em `http://localhost:3000`
 
-### 3️⃣ Configurando o Frontend
+### Configuração do Frontend
 ```bash
-cd ../frontend
+cd frontend
 npm install
 
-# Iniciar o servidor de desenvolvimento
+# Inicie o servidor de desenvolvimento
 npm run dev
 ```
-**🌐 Frontend estará rodando em**: `http://localhost:5173`
+O frontend estará disponível em `http://localhost:5173`
 
 ---
 
-## 📡 API Endpoints
+## Endpoints da API
 
-### 👤 Clientes
+### Gerenciamento de Clientes
 
 | Método | Endpoint | Descrição |
 |--------|----------|-----------|
 | `GET` | `/client` | Lista todos os clientes |
-| `GET` | `/client/paginated` | Lista clientes paginados |
-| `GET` | `/client/:id` | Busca cliente por ID |
+| `GET` | `/client/paginated` | Lista clientes com paginação |
+| `GET` | `/client/filtered` | Lista clientes com filtros |
+| `GET` | `/client/:id` | Busca cliente específico por ID |
 | `POST` | `/client` | Cadastra novo cliente |
-| `PUT` | `/client/:id` | Atualiza cliente existente |
-| `DELETE` | `/client/:id` | Remove cliente |
+| `PUT` | `/client/:id` | Atualiza dados de um cliente |
+| `DELETE` | `/client/:id` | Remove cliente do sistema |
 
-### Exemplo de Payload - Cliente
+### Exemplo de Payload
 ```json
 {
   "name": "João Silva",
@@ -143,9 +139,9 @@ npm run dev
 }
 ```
 
+---
 
-
-## 👨‍💻 Desenvolvedor
+## Desenvolvedor
 
 <div align="center">
 
@@ -154,7 +150,4 @@ npm run dev
 [![GitHub](https://img.shields.io/badge/GitHub-flavio--kolenez-181717?style=for-the-badge&logo=github)](https://github.com/flavio-kolenez)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0077b5?style=for-the-badge&logo=linkedin)](https://linkedin.com/in/fkolenez)
 
-
 </div>
-
----
