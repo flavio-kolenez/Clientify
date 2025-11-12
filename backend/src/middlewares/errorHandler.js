@@ -5,7 +5,9 @@ export const errorHandler = (err, req, res, next) => {
       message: e.message,
     }));
 
-    return res.status(400).json({
+    console.error(errors);
+
+  return res.status(400).json({
       status: "fail",
       errors,
     });
