@@ -26,6 +26,7 @@ import {
 } from "@radix-ui/react-tooltip"
 import { SearchCheck } from "lucide-react"
 import { InputOTPCep } from "./InputOTPCep"
+import { ActiveStatusBadge } from "./ActiveStatusBadge"
 
 import {
   AlertDialog,
@@ -72,19 +73,23 @@ interface ClientFormProps {
   onSuccess?: () => void;
   isEditMode?: boolean;
   clientId?: string;
-  showCard?: boolean; // Para controlar se mostra o Card wrapper ou não
-  showInternalAlert?: boolean; // Para controlar se mostra o AlertDialog interno
+  showCard?: boolean; 
+  showInternalAlert?: boolean;
+  isActive?: boolean; 
+  onActiveChange?: (isActive: boolean) => void; 
 }
 
-export function ClientForm({ 
-  title = "Cadastro de clientes", 
+export function ClientForm({
+  title = "Cadastro de clientes",
   description = "Preencha as informações do cliente!",
   initialData = {},
   onSuccess,
   isEditMode = false,
   clientId,
   showCard = true,
-  showInternalAlert = true
+  showInternalAlert = true,
+  isActive = true,
+  onActiveChange
 }: ClientFormProps) {
   const states = [
     { value: "AC", label: "Acre" },
@@ -199,8 +204,6 @@ export function ClientForm({
       },
     };
 
-    console.log(payload);
-
     try {
       let res;
       if (isEditMode && clientId) {
@@ -255,7 +258,6 @@ export function ClientForm({
     }
   }
 
-  // Componente do formulário sem o Card wrapper
   const FormContent = (
     <Form {...form}>
       <form
@@ -387,7 +389,6 @@ export function ClientForm({
           )}
         />
 
-        {/* Endereço */}
         <FormField
           control={form.control}
           name="street"
@@ -439,6 +440,15 @@ export function ClientForm({
           )}
         />
 
+        {isEditMode && onActiveChange && (
+          <div className="mb-4">
+            <ActiveStatusBadge
+              value={isActive}
+              onChange={onActiveChange}
+            />
+          </div>
+        )}
+
         {formError && (
           <div className="mb-2">
             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded text-xs">
@@ -472,7 +482,6 @@ export function ClientForm({
         </div>
       )}
 
-      {/* Só mostra o AlertDialog se showInternalAlert for true */}
       {showInternalAlert && (
         <AlertDialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <AlertDialogContent>

@@ -24,7 +24,8 @@ import { Button } from "@/components/ui/button"
 import { Mail, Phone, MapPin, Trash2, Heart, Pencil, MoreHorizontal } from "lucide-react"
 import { ClientForm } from "./ClientForm"
 import { SheetComponent } from "./SheetComponent"
-import { string } from "zod"
+import { api } from "../../services/api"
+import { FormLabel } from "./ui/form"
 
 interface ClientCardProps {
   client: {
@@ -50,7 +51,8 @@ interface ClientCardProps {
 export function ClientCard({ client, onDelete, onUpdate }: ClientCardProps) {
   const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
-  
+  const [isActive, setIsActive] = useState(client.isActive);
+
   const initial = client.name.charAt(0).toUpperCase()
   const isTata = ["Tata", "Thainara", "Tata <3"].includes(client.name)
 
@@ -69,7 +71,18 @@ export function ClientCard({ client, onDelete, onUpdate }: ClientCardProps) {
   const handleEditSuccess = () => {
     setIsEditSheetOpen(false);
     setShowSuccessAlert(true);
-    onUpdate?.(client._id); 
+    onUpdate?.(client._id);
+  };
+
+  const handleStatusChange = async (newStatus: boolean) => {
+    try {
+      await api.put(`/client/${client._id}`, { isActive: newStatus });
+      setIsActive(newStatus);
+      onUpdate?.(client._id);
+    } catch (error) {
+      console.error("Erro ao atualizar status:", error);
+      setIsActive(!newStatus);
+    }
   };
 
   return (
@@ -104,17 +117,17 @@ export function ClientCard({ client, onDelete, onUpdate }: ClientCardProps) {
           </div>
 
           <div className="flex flex-col gap-1 text-right">
-            <Badge
+           <Badge
               variant="outline"
               className={
-                client.isActive
+                isActive
                   ? "border-green-500 text-green-500"
-                  : "border-red-400 text-red-400"
+                  : "border-red-500 text-red-500"
               }
             >
-              {client.isActive ? "Ativo" : "Inativo"}
+              {isActive ? "Ativo" : "Inativo"}
             </Badge>
-            <Badge variant="outline" className="text-xs">
+            <Badge variant="outline" className="text-xs d-flex justify-center">
               {client.clientType}
             </Badge>
           </div>
@@ -187,7 +200,7 @@ export function ClientCard({ client, onDelete, onUpdate }: ClientCardProps) {
               </Button>
             }
             title="Editar Cliente"
-            description="Atualize as informações do cliente abaixo."
+            description={`Atualize as informações do cliente ${client.name} abaixo.`}
           >
             <ClientForm
               showCard={false}
@@ -195,6 +208,8 @@ export function ClientCard({ client, onDelete, onUpdate }: ClientCardProps) {
               clientId={client._id}
               onSuccess={handleEditSuccess}
               showInternalAlert={false}
+              isActive={isActive}
+              onActiveChange={handleStatusChange}
               initialData={{
                 name: client.name,
                 email: client.email,
@@ -211,7 +226,6 @@ export function ClientCard({ client, onDelete, onUpdate }: ClientCardProps) {
         </div>
       </CardFooter>
 
-      {/* AlertDialog de sucesso para edição - separado do Sheet */}
       <AlertDialog open={showSuccessAlert} onOpenChange={setShowSuccessAlert}>
         <AlertDialogContent>
           <AlertDialogHeader>

@@ -14,6 +14,7 @@ import { ClientCard } from "@/components/ClientCard";
 import { api } from "../../services/api";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { EmptyComponent } from "@/components/EmptyComponent";
+import { ClientFilters } from "@/components/ClientFilters";
 
 type Client = {
   _id: string;
@@ -45,12 +46,25 @@ export function ListClients() {
     }
   };
 
+  const fecthFilteredClients = async (
+    filters: Record<string, string | number | boolean | null | undefined> = {}
+  ) => {
+    const params = new URLSearchParams(
+      Object.entries(filters)
+        .filter(([_, v]) => v !== null && v !== undefined && v !== "")
+        .map(([k, v]) => [k, String(v)])
+    ).toString();
+
+    const res = await api.get(`/client/filtered?${params}`);
+    setClients(res.data.data);
+  };
+
   const renderClients = () => {
     if (clients.length > 0) {
       return clients.map((client) => (
-        <ClientCard 
-          key={client._id} 
-          client={client} 
+        <ClientCard
+          key={client._id}
+          client={client}
           onDelete={handleDelete}
           onUpdate={() => fetchClients(page)}
         />
@@ -86,10 +100,12 @@ export function ListClients() {
 
       <hr />
 
+      <ClientFilters onApply={(filters) => fecthFilteredClients(filters)} />
+
       {clients.length > 0 ? (
         <>
           <div className="p-4 mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-[1fr]">
-            {renderClients()}
+            { renderClients() }
           </div>
 
           <Pagination className="mt-6 flex justify-center">
@@ -125,10 +141,10 @@ export function ListClients() {
           </Pagination>
         </>
       ) : (
-          <div className="flex justify-center items-center h-[60vh]">
-            <EmptyComponent />
-          </div>
-        )
+        <div className="flex justify-center items-center h-[60vh]">
+          <EmptyComponent />
+        </div>
+      )
       }
     </>
   );
