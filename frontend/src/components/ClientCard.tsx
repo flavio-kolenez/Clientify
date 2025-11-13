@@ -25,7 +25,6 @@ import { Mail, Phone, MapPin, Trash2, Heart, Pencil, MoreHorizontal } from "luci
 import { ClientForm } from "./ClientForm"
 import { SheetComponent } from "./SheetComponent"
 import { api } from "../../services/api"
-import { FormLabel } from "./ui/form"
 
 interface ClientCardProps {
   client: {
@@ -86,7 +85,9 @@ export function ClientCard({ client, onDelete, onUpdate }: ClientCardProps) {
   };
 
   return (
-    <Card className="w-full h-full min-h-[200px] flex flex-col justify-between hover:shadow-lg transition-shadow overflow-hidden">
+    <Card className="w-full h-full min-h-[200px] flex flex-col justify-between hover:shadow-lg transition-shadow overflow-hidden
+      transition-transform duration-200 ease-out hover:-translate-y-1 hover:scale-1"
+    >
       <CardHeader className="p-5 pb-1">
         <div className="flex justify-between items-start">
           <div className="flex items-center gap-3">
@@ -120,13 +121,14 @@ export function ClientCard({ client, onDelete, onUpdate }: ClientCardProps) {
            <Badge
               variant="outline"
               className={
-                isActive
-                  ? "border-green-500 text-green-500"
-                  : "border-red-500 text-red-500"
+            isActive
+                  ? "border-green-500 text-green-500 hover:bg-green-100"
+                  : "border-red-600 text-red-600 hover:bg-red-100"
               }
             >
               {isActive ? "Ativo" : "Inativo"}
             </Badge>
+
             <Badge variant="outline" className="text-xs d-flex justify-center">
               {client.clientType}
             </Badge>
@@ -152,7 +154,7 @@ export function ClientCard({ client, onDelete, onUpdate }: ClientCardProps) {
       </CardContent>
 
       <CardFooter className="p-5 pt-1 flex justify-between gap-2 mt-auto">
-        <MoreHorizontal className="text-neutral-500 ml-2 hover:animate-bounce hover:text-neutral-900" size={15} />
+        <MoreHorizontal className="text-neutral-500 ml-2 hover:text-neutral-900" size={15} />
 
         <div className="gap-2 flex">
           <AlertDialog>

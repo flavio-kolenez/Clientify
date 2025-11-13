@@ -100,12 +100,11 @@ export function ListClients() {
 
       <hr />
 
-      <ClientFilters onApply={(filters) => fecthFilteredClients(filters)} />
-
       {clients.length > 0 ? (
         <>
+          <ClientFilters onApply={(filters) => fecthFilteredClients(filters)} />
           <div className="p-4 mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-[1fr]">
-            { renderClients() }
+            {renderClients()}
           </div>
 
           <Pagination className="mt-6 flex justify-center">
