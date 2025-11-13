@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import ClientSchema from "../models/ClientSchema.js";
+import { validateDocument } from "../utils/validateDocument.js";
 
 class ClientController {
   static async createClient(req, res, next) {
@@ -7,19 +8,7 @@ class ClientController {
 
     const { clientType, document } = clientData;
 
-    if (clientType === "CPF" && !/^\d{3}\.\d{3}\.\d{3}\-\d{2}$/.test(document)) {
-      return res.status(400).json({
-        status: "error",
-        message: "CPF inválido: esperado o formato XXX.XXX.XXX-XX"
-      });
-    };
-
-    if (clientType === "CNPJ" && !/^\d{2}\.\d{3}\.\d{3}\/\d{4}\-\d{2}$/.test(document)) {
-      return res.status(400).json({
-        status: "error",
-        message: "CNPJ inválido: esperado o formato XX.XXX.XXX/XXXX-XX"
-      });
-    };
+    validateDocument(clientType, document, res);
 
     try {
       const response = await ClientSchema.create(clientData);
@@ -164,7 +153,6 @@ class ClientController {
     };
   };
 
-  // controllers/clientController.js
   static getPaginatedClients = (req, res) => {
     res.status(200).json(res.paginatedResults);
   };
@@ -173,27 +161,9 @@ class ClientController {
     const { id } = req.params;
     const updateData = req.body;
 
-    // Validação manual do documento antes do update
     const { clientType, document } = updateData;
 
-    if (clientType && document) {
-      if (clientType === "CPF" && !/^\d{3}\.\d{3}\.\d{3}\-\d{2}$/.test(document)) {
-        return res.status(400).json({
-          status: "error",
-          message: "CPF inválido: esperado o formato XXX.XXX.XXX-XX"
-        });
-      }
-
-      if (clientType === "CNPJ" && !/^\d{2}\.\d{3}\.\d{3}\/\d{4}\-\d{2}$/.test(document)) {
-        return res.status(400).json({
-          status: "error",
-          message: "CNPJ inválido: esperado o formato XX.XXX.XXX/XXXX-XX"
-        });
-      }
-    }
-
-    console.log(updateData);
-    console.log(id);
+    validateDocument(clientType, document, res);
 
     try {
       const updatedClient = await ClientSchema.findByIdAndUpdate(
