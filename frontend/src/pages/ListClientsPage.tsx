@@ -102,7 +102,16 @@ export function ListClients() {
 
       {clients.length > 0 ? (
         <>
-          <ClientFilters onApply={(filters) => fecthFilteredClients(filters)} />
+          <ClientFilters onApply={(filters) => {
+            if (filters === null) {
+              // filtros limpos: manter paginação atual
+              fetchClients(page);
+            } else {
+              // aplicar filtros: ir para a primeira página com os filtros
+              setPage(1);
+              fecthFilteredClients(filters);
+            }
+          }} />
           <div className="p-4 mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-[1fr]">
             {renderClients()}
           </div>

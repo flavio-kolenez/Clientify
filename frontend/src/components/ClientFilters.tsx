@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Filter, ListFilter } from "lucide-react";
 
-export function ClientFilters({ onApply }: { onApply: (filters: any) => void }) {
+export function ClientFilters({ onApply }: { onApply: (filters: any | null) => void }) {
   const [open, setOpen] = useState(false);
   const [filters, setFilters] = useState({
     name: "",
@@ -25,7 +25,8 @@ export function ClientFilters({ onApply }: { onApply: (filters: any) => void }) 
 
   const handleClear = () => {
     setFilters({ name: "", email: "", clientType: "", isActive: "" });
-    onApply({});
+    // envia null para indicar que os filtros foram limpos e a paginação deve ser mantida
+    onApply(null);
   };
 
   return (

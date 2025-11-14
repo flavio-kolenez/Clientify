@@ -17,7 +17,6 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Interceptor de resposta para tratar 401/403 (token inválido/expirado)
 api.interceptors.response.use(
   (response) => response,
   (error) => {
