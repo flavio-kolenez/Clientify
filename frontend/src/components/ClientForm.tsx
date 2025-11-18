@@ -56,7 +56,12 @@ const formSchema = z.object({
   name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
   email: z.string().email("Email inválido"),
   phone: z.string().min(10, "Telefone deve ter pelo menos 10 dígitos"),
-  document: z.string().min(11, "Documento deve ter pelo menos 11 caracteres"),
+  document: z.string().refine((doc) => {
+    // Remove caracteres não numéricos para validar apenas os dígitos
+    const numbers = doc.replace(/\D/g, "");
+    // CPF deve ter 11 dígitos, CNPJ deve ter 14 dígitos
+    return numbers.length === 11 || numbers.length === 14;
+  }, "Documento inválido. CPF deve ter 11 dígitos, CNPJ deve ter 14 dígitos"),
   cep: z.string().length(8, "CEP inválido! Deve conter 8 dígitos numéricos."),
   street: z.string().min(2, "Rua obrigatória"),
   city: z.string().min(2, "Cidade obrigatória"),
@@ -180,6 +185,15 @@ export function ClientForm({
   // ----------------------------- SUBMIT ---------------------------------
   const onSubmit = async (values: FormValues) => {
     setFormError(null);
+
+    // Validação adicional do documento antes do envio
+    const numbersOnly = values.document.replace(/\D/g, "");
+    if (numbersOnly.length !== 11 && numbersOnly.length !== 14) {
+      setDialogType("error")
+      setDialogMessage("Documento inválido. CPF deve ter 11 dígitos, CNPJ deve ter 14 dígitos.")
+      setDialogOpen(true)
+      return
+    }
 
     // Valida o CEP e bloqueia se inválido
     const isCepValid = await handleValidateCep(values.cep)
@@ -315,8 +329,10 @@ export function ClientForm({
           name="document"
           render={({ field }) => {
             const documentValue = form.watch("document")
-            const isValidCPF = /^\d{3}\.\d{3}\.\d{3}-\d{2}$/.test(documentValue)
-            const isValidCNPJ = /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/.test(documentValue)
+            // Remove caracteres não numéricos para validar apenas os dígitos
+            const numbersOnly = documentValue.replace(/\D/g, "")
+            const isValidCPF = numbersOnly.length === 11
+            const isValidCNPJ = numbersOnly.length === 14
 
             return (
               <FormItem>
@@ -336,13 +352,11 @@ export function ClientForm({
                   />
                 </FormControl>
 
-                {/* mostra o tipo detectado apenas se for válido */}
                 {(isValidCPF || isValidCNPJ) && (
-                  <div className="text-xs text-gray-500">
-                    Tipo detectado: {form.watch("clientType")}
+                  <div className="text-xs text-green-600">
+                    Tipo detectado: {form.watch("clientType")} ✓
                   </div>
                 )}
-
                 <FormMessage />
               </FormItem>
             )

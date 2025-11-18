@@ -29,7 +29,6 @@ function App() {
           headers: { "Content-Type": "application/json" },
         });
 
-
         console.log("Headers:",res.headers);
 
         const data = res.data;
@@ -44,7 +43,6 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Rotas que usam o Layout base */}
         <Route element={<Layout />}>
           <Route path="/" element={<ListClients />} />
           <Route path="/clients/addClient" element={<AddClients />} />

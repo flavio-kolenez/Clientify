@@ -112,7 +112,7 @@ export function ListClients() {
               fecthFilteredClients(filters);
             }
           }} />
-          <div className="p-4 mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-[1fr]">
+          <div className="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-[1fr]">
             {renderClients()}
           </div>
 
@@ -139,9 +139,7 @@ export function ListClients() {
                   className={clients.length < 6 ? "pointer-events-none opacity-50 px-3 py-1 rounded" : "px-3 py-1 rounded"}
                 >
                   <div className="flex items-center gap-3">
-
                     Próximo <ArrowRight />
-
                   </div>
                 </button>
               </PaginationItem>
