@@ -33,16 +33,39 @@ type Client = {
 };
 
 export function ListClients() {
+  const [authError, setAuthError] = useState(false);
   const [clients, setClients] = useState<Client[]>([]);
   const [page, setPage] = useState(1);
+  const [hasNextPage, setHasNextPage] = useState(false);
+
+  const errorData = {
+    erro: "Erro de autenticação",
+    description: "Credencial invalida ou expirada, faça login novamente!",
+    icon: "Ticket-x"
+  }
 
   const fetchClients = async (pageNumber = 1) => {
     try {
-      const res = await api.get(`http://localhost:3000/client/paginated?page=${pageNumber}&limit=6`);
+      const res = await api.get(`/client/paginated?page=${pageNumber}&limit=6`);
       const clientsData = res.data?.data ?? [];
       setClients(clientsData);
-    } catch (err) {
-      console.error("Erro na requisição:", err);
+
+      // Verificar se há próxima página checando a próxima página
+      if (clientsData.length === 6) {
+        try {
+          const nextPageRes = await api.get(`/client/paginated?page=${pageNumber + 1}&limit=6`);
+          setHasNextPage(nextPageRes.data?.data?.length > 0);
+        } catch {
+          setHasNextPage(false);
+        }
+      } else {
+        setHasNextPage(false);
+      }
+    } catch (err: any) {
+      if (err.response?.status === 401 || err.response?.status === 403) {
+        setAuthError(true);
+        setClients([]);
+      }
     }
   };
 
@@ -72,7 +95,7 @@ export function ListClients() {
     } else {
       return (
         <div className="flex justify-center">
-          <EmptyComponent />
+          <EmptyComponent errorObj={authError ? errorData : undefined} />
         </div>
       );
     }
@@ -80,14 +103,36 @@ export function ListClients() {
 
   useEffect(() => {
     fetchClients(page);
-  }, [page]);
-
-  const handleDelete = async (id: string) => {
+  }, [page]); const handleDelete = async (id: string) => {
     try {
       await api.delete(`/client/${id}`);
-      fetchClients();
-    } catch (err) {
-      console.error("Erro ao deletar cliente:", err);
+
+      // Recarrega a página atual
+      const res = await api.get(`/client/paginated?page=${page}&limit=6`);
+      const newClients = res.data?.data ?? [];
+
+      // Se a página atual ficou vazia e não é a primeira página, volta uma página
+      if (newClients.length === 0 && page > 1) {
+        setPage(page - 1);
+        fetchClients(page - 1);
+      } else {
+        setClients(newClients);
+        // Atualizar hasNextPage verificando se a próxima página tem dados
+        if (newClients.length === 6) {
+          try {
+            const nextPageRes = await api.get(`/client/paginated?page=${page + 1}&limit=6`);
+            setHasNextPage(nextPageRes.data?.data?.length > 0);
+          } catch {
+            setHasNextPage(false);
+          }
+        } else {
+          setHasNextPage(false);
+        }
+      }
+    } catch (err: any) {
+      if (err.response?.status === 401 || err.response?.status === 403) {
+        setAuthError(true);
+      }
     }
   };
 
@@ -111,7 +156,8 @@ export function ListClients() {
               setPage(1);
               fecthFilteredClients(filters);
             }
-          }} />
+          }}
+          />
           <div className="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-[1fr]">
             {renderClients()}
           </div>
@@ -135,8 +181,8 @@ export function ListClients() {
               <PaginationItem>
                 <button
                   onClick={() => setPage((p) => p + 1)}
-                  disabled={clients.length < 6}
-                  className={clients.length < 6 ? "pointer-events-none opacity-50 px-3 py-1 rounded" : "px-3 py-1 rounded"}
+                  disabled={!hasNextPage}
+                  className={!hasNextPage ? "pointer-events-none opacity-50 px-3 py-1 rounded" : "px-3 py-1 rounded"}
                 >
                   <div className="flex items-center gap-3">
                     Próximo <ArrowRight />
@@ -148,7 +194,7 @@ export function ListClients() {
         </>
       ) : (
         <div className="flex justify-center items-center h-[60vh]">
-          <EmptyComponent />
+          <EmptyComponent errorObj={authError ? errorData : undefined} />
         </div>
       )
       }

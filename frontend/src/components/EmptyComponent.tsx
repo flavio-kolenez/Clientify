@@ -10,28 +10,49 @@ import { Button } from "./ui/button"
 
 
 import { Link } from "react-router-dom";
-import { BookDashed, UserPlus } from "lucide-react";
+import { BookDashed, UserPlus, TicketX } from "lucide-react";
 
-export function EmptyComponent() {
+export function EmptyComponent({
+  erro,
+  description,
+  errorObj
+}: {
+  erro?: string,
+  description?: string,
+  errorObj?: { erro: string, description: string, icon?: string }
+}) {
+  const title = errorObj?.erro || erro || "Nenhum cliente!";
+  const desc = errorObj?.description || description || "Nenhum cliente encontrado.";
+
+  const getIcon = () => {
+    if (errorObj?.icon === "Ticket-x") {
+      return <TicketX />;
+    }
+    return <BookDashed />;
+  };
+
   return (
     <Empty>
       <EmptyHeader>
         <EmptyMedia variant="icon">
-          <BookDashed />
+          {getIcon()}
         </EmptyMedia>
-        <EmptyTitle>Nenhum cliente!</EmptyTitle>
-        <EmptyDescription>Nenhum cliente encontrado.</EmptyDescription>
+        <EmptyTitle>{title}</EmptyTitle>
+        <EmptyDescription>
+          {desc}
+        </EmptyDescription>
       </EmptyHeader>
-      <EmptyContent>
-        <Link to={"/clients/addClient"}>
-          <Button>
 
-            <UserPlus className="h-5 w-5" />
-            <span>Cadastrar Cliente</span>
-          </Button>
-
-        </Link>
-      </EmptyContent>
+      {!errorObj && !erro && (
+        <EmptyContent>
+          <Link to={"/clients/addClient"}>
+            <Button>
+              <UserPlus className="h-5 w-5" />
+              <span>Cadastrar Cliente</span>
+            </Button>
+          </Link>
+        </EmptyContent>
+      )}
     </Empty>
   );
 }

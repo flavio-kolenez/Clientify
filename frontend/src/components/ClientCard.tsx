@@ -43,7 +43,7 @@ interface ClientCardProps {
     isActive: boolean
   }
   onDelete?: (id: string) => void
-  onUpdate?: (id: string) => void // Nova prop para callback quando atualizar
+  onUpdate?: (id: string) => void 
 }
 
 

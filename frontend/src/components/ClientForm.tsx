@@ -126,7 +126,6 @@ export function ClientForm({
     { value: "TO", label: "Tocantins" },
   ];
 
-  // ----------------------------- ESTADOS ---------------------------------
   const [dialogOpen, setDialogOpen] = useState(false)
   const [dialogType, setDialogType] = useState<"success" | "error" | null>(null)
   const [dialogMessage, setDialogMessage] = useState("")
@@ -136,7 +135,6 @@ export function ClientForm({
   )
   const [formError, setFormError] = useState<string | null>(null);
 
-  // ----------------------------- FORM HOOK ---------------------------------
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -152,7 +150,6 @@ export function ClientForm({
     },
   });
 
-  // ----------------------------- FUNÇÕES ---------------------------------
   const handleValidateCep = async (cep: string) => {
     try {
       const res = await validateCep(cep)
@@ -182,7 +179,6 @@ export function ClientForm({
     }
   }
 
-  // ----------------------------- SUBMIT ---------------------------------
   const onSubmit = async (values: FormValues) => {
     setFormError(null);
 
@@ -235,7 +231,7 @@ export function ClientForm({
           form.reset()
           setCepStatus("default")
         }
-        onSuccess?.(); // Chama callback se fornecido
+        onSuccess?.();
       } else {
         if (showInternalAlert) {
           setDialogType("error")

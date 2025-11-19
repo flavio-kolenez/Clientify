@@ -23,6 +23,7 @@ api.interceptors.response.use(
     const status = error?.response?.status;
     if (status === 401 || status === 403) {
       // Remove token inválido e opcionalmente redireciona para login
+      // como nesse caso nao possui login, nn acontece nada
       try {
         localStorage.removeItem("token");
       } catch (e) {}
