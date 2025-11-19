@@ -13,8 +13,6 @@ const ClientSchema = new mongoose.Schema({
         required: [true, "Número do documento necessário!"],
         validate: {
             validator: function (value) {
-                // Durante updates, this.clientType pode não estar disponível
-                // então vamos verificar se conseguimos acessar o clientType
                 const clientType = this.clientType || this.getUpdate?.()?.clientType || this.get?.('clientType');
                 
                 if (clientType === "CPF") {
@@ -22,8 +20,6 @@ const ClientSchema = new mongoose.Schema({
                 } else if (clientType === "CNPJ") {
                     return /^\d{2}\.\d{3}\.\d{3}\/\d{4}\-\d{2}$/.test(value);
                 }
-                
-                // Se não conseguir determinar o tipo, deixa passar (será validado no controller)
                 return true;
             },
         },

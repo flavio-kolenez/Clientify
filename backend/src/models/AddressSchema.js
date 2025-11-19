@@ -15,6 +15,7 @@ const AddressSchema = new mongoose.Schema({
 }, { _id: false });
 
 // Hook que roda antes de salvar o endereço
+// validando o codigo postal na api dos viacep
 AddressSchema.pre("save", async function (next) {
     if (this.isModified("postalCode")) {
         try {
