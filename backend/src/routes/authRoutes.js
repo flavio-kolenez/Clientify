@@ -1,8 +1,12 @@
 import express from "express";
 
-import { generateToken } from "../controllers/Auth.js";
+import AuthController from "../controllers/Auth.js";
 
+const authController = new AuthController();
 const router = express.Router();
 
-router.post("/token", generateToken);
+router.post("/token", (req, res) => authController.generateToken(req, res));
+router.post("/refresh", (req, res) => authController.refreshToken(req, res));
+
+
 export default router;
