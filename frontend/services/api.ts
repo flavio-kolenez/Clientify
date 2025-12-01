@@ -7,9 +7,9 @@ export const api = axios.create({
 // Interceptor para injetar o token salvo no localStorage em todas as requisições
 api.interceptors.request.use((config) => {
   try {
-    const token = localStorage.getItem("token");
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`;
+    const accessToken = localStorage.getItem("accessToken");
+    if (accessToken && config.headers) {
+      config.headers.Authorization = `Bearer ${accessToken}`;
     }
   } catch (e) {
     // localStorage pode não estar disponível em alguns ambientes; ignorar
@@ -22,12 +22,15 @@ api.interceptors.response.use(
   (error) => {
     const status = error?.response?.status;
     if (status === 401 || status === 403) {
-      // Remove token inválido e opcionalmente redireciona para login
-      // como nesse caso nao possui login, nn acontece nada
+      // Remove tokens inválidos e redireciona para login
       try {
-        localStorage.removeItem("token");
-      } catch (e) {}
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("accessTokenExpires");
+        window.location.href = '/login';
+      } catch (e) {
+        return Promise.reject(error);
+      }
     }
-    return Promise.reject(error);
   }
 );
