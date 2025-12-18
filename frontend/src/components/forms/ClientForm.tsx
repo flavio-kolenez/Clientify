@@ -25,8 +25,8 @@ import {
   TooltipTrigger,
 } from "@radix-ui/react-tooltip"
 import { SearchCheck } from "lucide-react"
-import { InputOTPCep } from "./InputOTPCep"
-import { ActiveStatusBadge } from "./ActiveStatusBadge"
+import { InputOTPCep } from "@/components/InputOTPCep"
+import { ActiveStatusBadge } from "@/components/ActiveStatusBadge"
 
 import {
   AlertDialog,
@@ -48,8 +48,8 @@ import {
 
 import * as z from "zod";
 
-import { api } from "../../services/api";
-import { validateCep } from "../../services/addressServices";
+import { api } from "../../../services/api";
+import { validateCep } from  "../../../services/addressServices";
 import { formatDocument } from "@/utils/utils";
 
 const formSchema = z.object({

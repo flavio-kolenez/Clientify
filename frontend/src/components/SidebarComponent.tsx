@@ -17,13 +17,16 @@ import {
 
 import { Settings, UserPlus, Users, UsersRound } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useTheme } from "@/contexts/ThemeContext";
 
 export function SidebarComponent() {
+  const { theme, toggleTheme } = useTheme();
+
   return (
     <Sidebar side="left" collapsible="icon">
       <SidebarHeader
         className="
-            bg-neutral-100
+            bg-sidebar-DEFAULT text-sidebar-foreground
             px-4 py-2 border-b
             flex flex-row items-center justify-start
             transition-all
@@ -41,11 +44,11 @@ export function SidebarComponent() {
             group-data-[collapsible=icon]:overflow-hidden
           "
         >
-          Clientify
+          PineWork
         </h2>
       </SidebarHeader>
 
-      <SidebarContent className="p-2 space-y-1  bg-neutral-100" >
+      <SidebarContent className="p-2 space-y-1 bg-sidebar-DEFAULT text-sidebar-foreground" >
         <SidebarMenu>
           <SidebarMenuItem>
             <Link to="/clients/list">
@@ -61,11 +64,18 @@ export function SidebarComponent() {
                 <span>Cadastrar Cliente</span>
               </SidebarMenuButton>
             </Link>
+
+            <Link to={"/users/addUser"}>
+              <SidebarMenuButton>
+                <UserPlus className="h-5 w-5" />
+                <span>Registrar usuário</span>
+              </SidebarMenuButton>
+            </Link>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarContent>
 
-      <SidebarFooter className="border-t bg-neutral-100">
+      <SidebarFooter className="border-t bg-sidebar-DEFAULT text-sidebar-foreground">
         <SidebarMenu>
           <SidebarMenuItem>
             <DropdownMenu>
@@ -75,9 +85,15 @@ export function SidebarComponent() {
                   <span>Configurações</span>
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
-              <DropdownMenuContent side="top"className="w-[--radix-popper-anchor-width] bg-neutral-100">
-                <DropdownMenuItem>
-                  <span>Mudar tema</span>
+              <DropdownMenuContent side="top">
+                <DropdownMenuItem onClick={toggleTheme}>
+                  <span>Mudar tema ({theme === "light" ? "Escuro" : "Claro"})</span>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem asChild>
+                  <Link to="/users/me">
+                    <span>Configurações de usuário</span>
+                  </Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

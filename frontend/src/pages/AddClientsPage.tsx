@@ -1,5 +1,5 @@
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { ClientForm } from "@/components/ClientForm"
+import { ClientForm } from "@/components/forms/ClientForm"
 
 export function AddClients() {
   return (

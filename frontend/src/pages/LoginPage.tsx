@@ -61,10 +61,10 @@ const LoginPage = () => {
                 <UsersRound className="w-8 h-8 text-blue-600" />
               </div>
               <CardTitle className="text-2xl font-bold text-gray-900">
-                Clientify
+                Login
               </CardTitle>
               <CardDescription className="text-gray-600">
-                Sistema de Gestão de Clientes
+                PineWork
               </CardDescription>
             </CardHeader>
             

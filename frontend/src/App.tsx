@@ -5,6 +5,10 @@ import { ListClients } from "./pages/ListClientsPage";
 import LoginPage from "./pages/LoginPage";
 import { useEffect } from "react";
 import { api } from "../services/api";
+import { ThemeProvider } from "@/contexts/ThemeContext";
+import { RegisterUser } from "./pages/RegisterUser";
+import { UserPage } from "./pages/UserPage";
+
 
 function App() {
   useEffect(() => {
@@ -19,7 +23,7 @@ function App() {
         // Função para verificar se token expirou
         const isTokenExpired = () => {
           if (!expiresAt) return true; // se nao tem data é pq expirou
-          return Date.now() >= parseInt(expiresAt); 
+          return Date.now() >= parseInt(expiresAt);
           // compara o tempo atual x o tempo de expiração 
           // - Date.now > expiresAt? : expirou 
           // - Date.now < expiresAt? : valido
@@ -30,7 +34,7 @@ function App() {
           const res = await api.post("/auth/refresh", {
             refreshToken: refreshToken
           });
-          
+
           localStorage.setItem("accessToken", res.data.access_token);
           const newExpiresAt = Date.now() + (res.data.expires_in * 1000);
           localStorage.setItem("accessTokenExpires", newExpiresAt.toString());
@@ -43,7 +47,7 @@ function App() {
             client_id: import.meta.env.VITE_CLIENT_ID,
             client_secret: import.meta.env.VITE_CLIENT_SECRET,
           };
-          
+
           const res = await api.post("/auth/token", payload, {
             headers: { "Content-Type": "application/json" },
           });
@@ -58,7 +62,7 @@ function App() {
           // Renovar token expirado
           await renewAccessToken();
         }
-        
+
       } catch (err) {
         console.error("Erro ao obter token:", err);
         // Se der erro, limpar tudo e tentar login novamente
@@ -72,16 +76,20 @@ function App() {
   }, []);
 
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route element={<Layout />}>
-          <Route path="/" element={<ListClients />} />
-          <Route path="/clients/addClient" element={<AddClients />} />
-          <Route path="/clients/list" element={<ListClients />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+    <ThemeProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route element={<Layout />}>
+            <Route path="/" element={<ListClients />} />
+            <Route path="/clients/addClient" element={<AddClients />} />
+            <Route path="/clients/list" element={<ListClients />} />            
+            <Route path="/users/addUser" element={<RegisterUser />} />   
+            <Route path="/users/me" element={<UserPage />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </ThemeProvider>
   );
 }
 

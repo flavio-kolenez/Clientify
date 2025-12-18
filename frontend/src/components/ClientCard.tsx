@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import { Mail, Phone, MapPin, Trash2, Heart, Pencil, MoreHorizontal } from "lucide-react"
-import { ClientForm } from "./ClientForm"
+import { ClientForm } from "./forms/ClientForm"
 import { SheetComponent } from "./SheetComponent"
 import { api } from "../../services/api"
 
@@ -43,7 +43,7 @@ interface ClientCardProps {
     isActive: boolean
   }
   onDelete?: (id: string) => void
-  onUpdate?: (id: string) => void 
+  onUpdate?: (id: string) => void
 }
 
 
@@ -118,12 +118,12 @@ export function ClientCard({ client, onDelete, onUpdate }: ClientCardProps) {
           </div>
 
           <div className="flex flex-col gap-1 text-right">
-           <Badge
+            <Badge
               variant="outline"
               className={
-            isActive
-                  ? "border-green-500 text-green-500 hover:bg-green-100"
-                  : "border-red-600 text-red-600 hover:bg-red-100"
+                isActive
+                  ? "border-green-500 text-green-500 hover:bg-green-100 dark:hover:bg-green-900"
+                  : "border-red-600 text-red-600 hover:bg-red-100 dark:hover:bg-red-900"
               }
             >
               {isActive ? "Ativo" : "Inativo"}
@@ -162,7 +162,7 @@ export function ClientCard({ client, onDelete, onUpdate }: ClientCardProps) {
               <Button
                 variant="outline"
                 size="sm"
-                className="gap-2 text-xs h-8 px-2 border-red-600 text-red-600 hover:bg-red-100 hover:text-red-700"
+                className="gap-2 text-xs h-8 px-2 border-red-600 text-red-600 hover:bg-red-100 hover:text-red-700 dark:hover:bg-red-900 dark:hover:text-red-300"
 
               >
                 <Trash2 size={14} />
@@ -181,7 +181,7 @@ export function ClientCard({ client, onDelete, onUpdate }: ClientCardProps) {
                 <AlertDialogCancel>Cancelar</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={() => onDelete && onDelete(client._id)}
-                  className="bg-red-700 hover:bg-red-800"
+                  className="bg-red-700 hover:bg-red-800 dark:bg-red-900 dark:hover:bg-red-800"
                 >
                   Confirmar
                 </AlertDialogAction>
@@ -195,7 +195,7 @@ export function ClientCard({ client, onDelete, onUpdate }: ClientCardProps) {
             trigger={
               <Button variant="outline"
                 size="sm"
-                className="text-xs h-8 px-2 border-violet-600 text-violet-600 hover:bg-violet-100 hover:text-violet-700"
+                className="text-xs h-8 px-2 border-violet-600 text-violet-600 hover:bg-violet-100 hover:text-violet-700 dark:hover:bg-violet-900 dark:hover:text-violet-300"
               >
                 <Pencil />
                 Editar
